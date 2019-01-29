@@ -1,0 +1,60 @@
+/*
+
+app-template.css overrides
+
+remove this comment if used
+remove this file if not
+
+*/
+.no-task-tip {
+	padding: 10px 0 10px 10px;
+	display: block;
+	border-bottom: 1px solid #ededed;
+	color: #777
+}
+.mybtn{
+	color: black;
+	background-color: #fff;
+	border-radius: 10px;
+	position: relative;
+	right: 0;
+	top: 0;
+	width: 150px;
+	height: 30px;
+	line-height: 30px;
+	transform: translate(265%,50%);
+}
+.mybtn li{
+	height: 30px;
+	margin: 0px 6px;
+}
+.mybtn li a{
+	width: 100%;
+	height: 100%;
+}
+.mybtn li:nth-child(1){
+	float: left
+}
+.mybtn li:nth-child(2){
+	float: right
+}
+.todoapp{
+	width: 100%;
+	height: 100%;
+	position: relative;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%,0%)
+}
+.add{
+	position: absolute;
+	width: 0.5rem;
+	height: 0.5rem;
+	border: 2px solid #dcd7d7;
+	border-radius: 0.5rem;
+	font-size: 0.014rem;
+	right: 0;
+    top: 0;
+    transform: translate(-40%,-160%);
+}
+

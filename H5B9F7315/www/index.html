@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<title>Template • TodoMVC</title>
+	<link rel="stylesheet" href="todomvc-common/base.css">
+	<link rel="stylesheet" href="todomvc-app-css/index.css">
+	<!-- CSS overrides - remove if you don't need it -->
+	<link rel="stylesheet" href="css/app.css">
+	<script src="./js/vuev2.5.21.js"></script>
+	<script src="./js/rem.js"></script>
+</head>
+<body>
+	<section class="todoapp" id="app">
+		<!--语言切换-->
+		<!-- <ol class="filters mybtn">
+			<li>
+				<a href="#" class="completed!=completed" @click="china">中文</a>
+			</li>
+			<li>
+				<a href="#" class="completed!=completed">English</a>
+			</li>
+		</ol> -->
+		<header class="header">
+			<h1>todos</h1>
+			<input class="new-todo"
+			 placeholder="What needs to be done?" 
+			 autofocus v-model="name"
+			  @keyup.enter="add">
+		</header>
+		<!-- This section should be hidden by default and shown when there are todos -->
+		<section class="main">
+			<input id="toggle-all" class="toggle-all" type="checkbox">
+			<label for="toggle-all">Mark all as complete</label>
+			<span class="no-task-tip" v-show="!list.length">{{msg | msgFormat('没有添加任何任务')}}</span>
+			<!-- <span class="no-task-tip" v-show="!list.length">{{msg }}</span> -->
+			<ul class="todo-list" v-show="list.length">
+				<!-- These are here just to show the structure of the list items -->
+				<!-- List items should get the class `editing` when editing and `completed` when marked as completed -->
+				<!-- <li  v-for="(item,index) in list" :key="item.id" :class="item.flag ? 'todo completed' : 'todo' "  > -->
+				<li v-for="(item,index) in filterData" 
+				 :key="item.id"
+				 class="name" 
+				 v-bind:class="{completed: item.flag,editing:item===edtorTodos }">
+					<div class="view">
+						<input class="toggle" type="checkbox" v-model="item.flag">
+						<!-- <label>{{item.id}}---{{item.name}}</label> -->
+						<label  @dblclick="edtorTodo(item)" >{{item.name}}</label>
+						<button class="destroy" @click="del(index)"></button>
+					</div>
+					<input 
+						class="edit"
+                        type="text"
+                        v-focus="edtorTodos===item"
+                        v-model="item.title"
+                        @blur="edtoEnd(item)"
+                        @keyup.enter="edtoEnd(item)"
+                        @keyup.esc="cancelEdit(item)"
+						/>
+				</li>
+			</ul>
+		</section>
+		<!-- This footer should hidden by default and shown when there are todos -->
+		<footer class="footer">
+			<!-- This should be `0 items left` by default -->
+			<span class="todo-count"><strong>{{count}}</strong> item left</span>
+			<!-- Remove this if you don't implement routing -->
+			<ul class="filters">
+				<li>
+					<a :class="{selected:visibility!== 'unCompleted' && visibility!=='completed'}" 
+					href="#all">All</a>
+				</li>
+				<li>
+					<a :class="{selected:visibility === 'unCompleted'}" 
+					href="#unCompleted">unCompleted</a>
+				</li>
+				<li>
+					<a :class="{selected:visibility === 'completed'}"
+					 href="#completed">Completed</a>
+				</li>
+			</ul>
+			<!-- Hidden if no completed items are left ↓ -->
+			<button class="clear-completed">Clear completed</button>
+		</footer>
+	</section>
+	<footer class="info">
+		<p>Double-click to edit a todo</p>
+		<!-- Remove the below line ↓ -->
+		<p>Template by <a href="http://sindresorhus.com">Sindre Sorhus</a></p>
+		<!-- Change this out with your name and url ↓ -->
+		<p>Created by <a href="http://todomvc.com">you</a></p>
+		<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+	</footer>
+	<!-- Scripts here. Don't remove ↓ -->
+	<script src="node_modules/todomvc-common/base.js"></script>
+	<script src="js/app.js"></script>
+	<script>
+		
+		//存取localStorage中的数据
+		var store = {
+			save(key, value) {
+				window.localStorage.setItem(key, JSON.stringify(value));
+			},
+			fetch(key) {
+				return JSON.parse(window.localStorage.getItem(key)) || [];
+			}
+		}
+		//list取出所有的值
+		var list = store.fetch("storeData");
+		Vue.filter('msgFormat',(msg,arg)=>{return msg.replace(/No tasks have been added/g,arg)})
+		 var vm = new Vue({
+			el: "#app",
+			data: {
+				name: '',
+				list,
+				flag: false,
+				edtorTodos:"", //记录正在编辑的数据,
+				beforeTitle:"",//记录正在编辑的数据
+				visibility: "all",//通过这个属性值的变化对数据进行筛选
+				msg:"No tasks have been added"
+			},
+			watch: {
+				list: {
+					handler: function () {
+						store.save("storeData", this.list)
+					},
+					deep: true
+				}
+			},
+			methods: {
+				add(id) {
+					if (this.name == " ") {
+						return;
+					}
+					this.list.push({
+						name: this.name,
+						flag: false
+					});
+					this.name = ""
+				},
+				del(index) {
+					//console.log(index)
+					this.list.splice(index, 1)
+				},
+				edtorTodo(item){//编辑任务
+					this.beforeTitle = item.name;
+					this.edtorTodos = item;
+				},
+				edtoEnd(item){//编辑完成
+					this.edtorTodos=""
+				},
+				china(){
+					console.log(11111111);	
+				}
+			},
+			directives:{
+				"focus":{
+					update(el,binding){
+						if(binding.value){
+							el.focus();
+						}
+					}
+				}
+			},
+			computed: {
+				//计算当前完成
+				count() {
+					return this.list.filter(item => !item.flag).length
+				},
+				filterData() {
+					//过滤的时候有三种情况 all active completed 
+					var filter = {
+						all: function (list) {
+							return list;
+						},
+						completed: function (list) {
+							return list.filter(item => {
+								return item.flag;
+							})
+						},
+						unCompleted: function (list) {
+							return list.filter(item => {
+								return !item.flag;
+							})
+						}
+						
+					}
+					//如果找到过滤函数就返回过滤后的函数
+					return filter[this.visibility]?filter[this.visibility](list):list
+				}
+
+			}
+
+		})
+
+		function hashFn() {
+			var hash = window.location.hash.slice(1)
+			vm.visibility = hash
+		}
+		hashFn();
+		window.addEventListener('hashchange', hashFn)
+
+	</script>
+</body>
+
+</html>
